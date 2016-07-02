@@ -25,14 +25,14 @@ export default class Zoneminder extends EventEmitter {
 
   _refreshMonitors() {
     return apiRequest(url.resolve(this._apiBase, `api/monitors.json${this._authHash ? ('?auth=' + this._authHash) : ''}`))
-      .then(({ monitors }) => this._monitors = monitors.map(({ Monitor }) => ({ stream: this.getMonitorURL(Monitor.Id), ...Monitor })))
+      .then(({ monitors }) => this._monitors = monitors.map(({ Monitor }) => ({ stream: this._resolveMonitorStream(Monitor.Id), ...Monitor })))
   }
 
   _refreshZMEvents() {
     return true
   }
 
-  getMonitorURL(monitor_id) {
+  _resolveMonitorStream(monitor_id) {
     const query = qs.stringify({
       maxfps: this._maxfps,
       mode: this._mode,
