@@ -2,6 +2,7 @@
 logs
 *.log
 npm-debug.log*
+.jsbeautifyrc
 
 # Runtime data
 pids
