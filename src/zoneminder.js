@@ -5,8 +5,9 @@ import request from 'browser-request'
 
 
 export default class Zoneminder extends EventEmitter {
-  constructor(apiBase, mode = 'jpeg', maxfps = 30) {
+  constructor({ apiBase, mode = 'jpeg', maxfps = 30, authHash = null }) {
     super()
+    this._authHash = authHash
     this._apiBase = apiBase
     this._maxfps = maxfps
     this._mode = mode
@@ -23,7 +24,7 @@ export default class Zoneminder extends EventEmitter {
   }
 
   _refreshMonitors() {
-    return apiRequest(url.resolve(this._apiBase, 'api/monitors.json'))
+    return apiRequest(url.resolve(this._apiBase, `api/monitors.json${this._authHash ? ('?auth=' + this._authHash) : ''}`))
       .then(({ monitors }) => this._monitors = monitors.map(({ Monitor }) => ({ stream: this.getMonitorURL(Monitor.Id), ...Monitor })))
   }
 
@@ -36,8 +37,9 @@ export default class Zoneminder extends EventEmitter {
       maxfps: this._maxfps,
       mode: this._mode,
       monitor: monitor_id,
-      rand: Math.random()
-    })
+      rand: Math.random(),
+      authHash: this._authHash
+    }, { skipNulls: true })
     return url.resolve(this._apiBase, `cgi-bin/nph-zms?${query}`)
   }
 
