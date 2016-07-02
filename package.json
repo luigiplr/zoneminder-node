@@ -8,6 +8,7 @@
   },
   "private": true,
   "dependencies": {
+    "browser-request": "^0.3.3",
     "qs": "^6.2.0",
     "url": "^0.11.0"
   },
