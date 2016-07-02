@@ -18,8 +18,7 @@ export default class Zoneminder extends EventEmitter {
   _monitors = null
 
   _init() {
-    this._refreshMonitors()
-      .then(::this._refreshZMEvents)
+    Promise.all([this._refreshMonitors(), this._refreshZMEvents()])
       .then(() => this.emit('initialized'))
   }
 
@@ -43,6 +42,10 @@ export default class Zoneminder extends EventEmitter {
     return url.resolve(this._apiBase, `cgi-bin/nph-zms?${query}`)
   }
 
+  addMonitor(Monitor) {
+    return apiRequest(url.resolve(this._apiBase, `${this._authHash ? ('?auth=' + this._authHash) : ''}`), 'POST', { form: { Monitor } })
+  }
+
   get monitors() {
     return this._monitors
   }
@@ -52,10 +55,12 @@ export default class Zoneminder extends EventEmitter {
   }
 }
 
-export function apiRequest(requestURL) {
+export function apiRequest(requestURL, method = 'GET', parms = {}) {
   return new Promise((resolve, reject) => request({
+    method,
     url: requestURL,
-    json: true
+    json: true,
+    ...parms
   }, (err, res, body) => {
     if (err) return reject(err)
     resolve(body)
